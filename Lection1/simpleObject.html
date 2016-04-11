@@ -17,8 +17,14 @@
 			function CreateSphere(radius)
 			{
 				var geometry = new THREE.SphereGeometry( radius, 16, 16 );
-				var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+				//var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+				var material = new THREE.MeshPhongMaterial ( {color: 0x2194ce} );
+				material.depthTest = true;
+				material.depthWrite = true;
 				var sphere = new THREE.Mesh( geometry, material );
+				sphere.castShadow = true;
+				sphere.recieveShadow = true;
+				sphere.matrixAutoUpdate = false;
 				scene.add( sphere );
 				return sphere;
 			}
@@ -38,10 +44,18 @@
 
 			//-----------------------------------------------------------------------
 			var scene = new THREE.Scene();
+
 			var camera = new THREE.PerspectiveCamera( 45,
 				window.innerWidth / window.innerHeight,
 				0.1, 1000 );
 			camera.position.z = 10;
+
+			var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+			scene.add( light );
+			var light = new THREE.PointLight( 0xffffff, 1, 1000 );
+			light.position.set( 50, 20, 10 );
+			scene.add( light );
+
 			var renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.body.appendChild( renderer.domElement );	
@@ -49,13 +63,14 @@
 
 			var move = false;
 			var spheres = [];
-			var sphereCount = 3;
+			var sphereCount = 10;
 			var shpereSize = 1;
 
 			for (var i = 0; i  < sphereCount; i++)
 			{
 				spheres.push(CreateSphere(shpereSize / 2));
 				spheres[i].position.x = (i*shpereSize) - shpereSize / 2 * (sphereCount - 1);
+				spheres[i].updateMatrix();
 			}
 
 			render();
