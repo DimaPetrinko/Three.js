@@ -36,6 +36,7 @@
 					for (var i = spheres.length - 1; i >= 0; i--) 
 					{
 						spheres[i].position.y -= 0.5 * fixedDeltaTime;
+						spheres[i].updateMatrix();
 					}
 				}
 
@@ -44,7 +45,6 @@
 
 			//-----------------------------------------------------------------------
 			var scene = new THREE.Scene();
-
 			var camera = new THREE.PerspectiveCamera( 45,
 				window.innerWidth / window.innerHeight,
 				0.1, 1000 );
