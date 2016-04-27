@@ -5,7 +5,9 @@
 		<title>My first Three.js app</title>
 		<style>
 			body { margin: 0; }
-			#container {width: 1024px; height: 600px;}
+			#container {width: 1024px;
+			 height: 600px;
+			 background: url('images/space.jpg') center no-repeat;}
 		</style>
 	</head>	
 		<script src="../js/three.min.js"></script>
@@ -15,7 +17,7 @@
 			const fixedDeltaTime = 1.0 / 60;
 
 			var scene, camera, renderer, container, controls;
-			var cube, sphere;
+			var cube, sphere, plane;
 
 			var angle = 0;
 
@@ -28,7 +30,8 @@
 				1, 1000 );
 				camera.position.z = 20;
 				camera.position.y = 2;
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
+				renderer.setClearColor(0xffffff, 0);
 				renderer.setSize(container.offsetWidth, container.offsetHeight);
 				container.appendChild(renderer.domElement);	
 				controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -36,20 +39,46 @@
 
 			function geometry()
 			{
-				var geometry = new THREE.BoxGeometry(1,1,2);
-				var material = new THREE.MeshBasicMaterial( {color: 0x2194ce, wireframe: true} );
-				cube = new THREE.Mesh(geometry, material);
-				scene.add(cube);
+				var loader = new THREE.TextureLoader();
+				loader.load('images/earth.jpg', function (texture) {
+				var geometry = new THREE.SphereGeometry(1,32,32);
+				var material = new THREE.MeshPhongMaterial( {map: texture} );
+				sphere = new THREE.Mesh(geometry, material);
+				sphere.castShadow = true;
+				scene.add(sphere)});
+
+				var geometry = new THREE.PlaneGeometry(1,5,1,1);
+				var material = new THREE.MeshPhongMaterial({color: 0x111111, side: THREE.DoubleSide});
+				plane = new THREE.Mesh(geometry, material);
+				plane.position.set(0,-1,0);
+				plane.rotation.x = Math.PI/2;
+				plane.receiveShadow = true;
+				scene.add(plane);
+			}
+
+			function light()
+			{
+				//var light = new THREE.AmbientLight( 0x111111 );
+				//scene.add( light );
+				var spotLight = new THREE.SpotLight( 0xffffff);
+				spotLight.position.set( 0, 50,0);
+				spotLight.castShadow = true;
+				spotLight.shadow.camera.near = 0.1;
+				spotLight.shadow.camera.far = 4000;
+				spotLight.shadow.camera.fov = 30;
+				scene.add( spotLight );
 			}
 
 			function animate()
 			{
 				requestAnimationFrame( animate );
 				controls.update();
+				renderer.shadowMapEnabled = true;
+				renderer.shadowMapSoft = true;
 				//sphere.position.x = Math.cos(angle) * 20;
 				//sphere.position.z = Math.sin(angle) * 20;
-				cube.translateZ(2 * fixedDeltaTime);
-				cube.rotation.y +=.01;
+				//sphere.translateZ(2 * fixedDeltaTime);
+				//sphere.rotation.y +=.01;
 				angle+=.1;
 				if (angle >= 360) { angle = 0; }
 
@@ -60,6 +89,7 @@
 			{
 				initScene();
 				geometry();
+				light()
 				animate();
 			}
 
