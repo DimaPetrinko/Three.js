@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>My first Three.js app</title>
+		<style>
+			body { margin: 0; overflow: :hidden;}
+		</style>
+	</head>	
+		<script src="../js/three.min.js"></script>
+		<script src="../js/OrbitControls.js"></script>
+		<script src="../js/KeyboardState.js"></script>
+		<script src="../js/dat.gui.js"></script>
+		<script>
+			// initialization
+			const fixedDeltaTime = 1.0 / 60;
+
+			var scene, camera, renderer, container, controls, orbitControls, gui, texture, keyboard;
+			var cube, sphere, plane;
+			var step = 0;
+
+			function initScene()
+			{
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 45,
+				window.innerWidth / window.innerHeight,
+				1, 1000 );
+				renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
+				renderer.setClearColor(0xEEEEEE, 1);
+				renderer.setSize(window.innerWidth, window.innerHeigth);
+				renderer.shadowMapEnabled = true;
+				document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+				orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+				keyboard = new KeyboardState();
+
+				camera.position.set(-30,40,30);
+				camera.lookAt(scene.position);				
+			}
+
+			function geometry()
+			{
+				var loader = new THREE.TextureLoader();
+				cube = loader.load('images/earth.jpg', function (texture) {
+					var geometry = new THREE.CubeGeometry(4,4,4);
+					var material = new THREE.MeshBasicMaterial( {map: texture} );
+					cube = new THREE.Mesh(geometry, material);
+					cube.position.set(-4, 2.5,0);
+					cube.castShadow = true;
+					scene.add(cube);
+				});
+
+				loader = new THREE.TextureLoader();
+				sphere = loader.load('images/earth.jpg', function (texture) {
+					var geometry = new THREE.SphereGeometry(4,32,32);
+					var material = new THREE.MeshPhongMaterial( {map: texture});
+					sphere = new THREE.Mesh(geometry, material);
+					sphere.position.set(20,0,2);
+					sphere.castShadow = true;
+					scene.add(sphere);
+
+				});
+
+				loader = new THREE.TextureLoader();
+				plane = loader.load('images/earth.jpg', function (texture) {
+					var geometry = new THREE.PlaneGeometry(60,20,1,1);
+					var material = new THREE.MeshPhongMaterial( {map: texture, side: THREE.DoubleSide});
+					plane = new THREE.Mesh(geometry, material);
+					plane.position.set(15,0,0);
+					plane.rotation.x = Math.PI / 2;
+					plane.receive = true;
+					scene.add(plane);
+
+				});
+			}
+
+			function light()
+			{
+				var ambientLight = new THREE.AmbientLight( 0x111111 );
+				scene.add( ambientLight );
+
+				var spotLight = new THREE.SpotLight( 0xffffff);
+				spotLight.position.set( -40, 60, -10);
+				spotLight.castShadow = true;
+				scene.add( spotLight );
+			}
+
+			function guiControl()
+			{
+				controls = new function ()
+				{
+					this.rotationSpeed = 0.02;
+					this.bouncingSpeed = 0.03;
+				}
+				gui = new dat.GUI();
+				gui.add(controls, 'rotationSpeed', 0, 0.5);
+				gui.add(controls, 'bouncingSpeed', 0, 0.5);
+			}
+
+			function key()
+			{
+				if (keyboard.down("left") || keyboard.pressed("A")) sphere.translateX(-1);
+				if (keyboard.down("right") || keyboard.pressed("D")) sphere.translateX(1);
+				if (keyboard.down("up") || keyboard.pressed("W")) sphere.translateZ(-1);
+				if (keyboard.down("down") || keyboard.pressed("S")) sphere.translateZ(1);
+			}
+
+			function animate()
+			{
+				requestAnimationFrame( animate );
+				key();
+				orbitControls.update();
+
+				sphere.position.set(1,1,1);
+				/*cube.rotation.x += controls.rotationSpeed;
+				cube.rotation.y += controls.rotationSpeed;
+				cube.rotation.z += controls.rotationSpeed;
+
+				step += controls.bouncingSpeed;
+
+				sphere.position.x = 20 + (10 *(Math.cos(step)));
+				sphere.position.y = 3.5 + (10 * Math.abs(Math.sin(step)));
+				*/
+
+				//renderer.shadowMapEnabled = true;
+				//renderer.shadowMapSoft = true;
+
+				keyboard.update();
+				renderer.render( scene, camera );
+			}
+
+			function render() 
+			{
+				initScene();
+				geometry();
+				light()				
+				key();
+				guiControl();
+				animate();
+			}
+
+			//render();
+		</script>
+	<body onLoad="render();">
+	<div id="WebGL-output"></div>
+	</body>
+</html>

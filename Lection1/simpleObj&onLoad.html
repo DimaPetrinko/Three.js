@@ -12,11 +12,13 @@
 	</head>	
 		<script src="../js/three.min.js"></script>
 		<script src="../js/OrbitControls.js"></script>
+		<script src="../js/KeyboardState.js"></script>
 		<script>
 			// initialization
 			const fixedDeltaTime = 1.0 / 60;
 
 			var scene, camera, renderer, container, controls;
+			var keyboard;
 			var cube, sphere, plane;
 
 			var angle = 0;
@@ -35,6 +37,7 @@
 				renderer.setSize(container.offsetWidth, container.offsetHeight);
 				container.appendChild(renderer.domElement);	
 				controls = new THREE.OrbitControls(camera, renderer.domElement);
+				keyboard = new KeyboardState();
 			}
 
 			function geometry()
@@ -69,19 +72,29 @@
 				scene.add( spotLight );
 			}
 
+			function key()
+			{
+				if (keyboard.down("left") || keyboard.pressed("A")) sphere.translateX(-1);
+				if (keyboard.down("right") || keyboard.pressed("D")) sphere.translateX(1);
+				if (keyboard.down("up") || keyboard.pressed("W")) sphere.translateZ(-1);
+				if (keyboard.down("down") || keyboard.pressed("S")) sphere.translateZ(1);
+			}
+
 			function animate()
 			{
 				requestAnimationFrame( animate );
+				key();
 				controls.update();
 				renderer.shadowMapEnabled = true;
 				renderer.shadowMapSoft = true;
-				//sphere.position.x = Math.cos(angle) * 20;
+				//sphere.position.x = .htmlMath.cos(angle) * 20;
 				//sphere.position.z = Math.sin(angle) * 20;
 				//sphere.translateZ(2 * fixedDeltaTime);
 				//sphere.rotation.y +=.01;
 				angle+=.1;
 				if (angle >= 360) { angle = 0; }
 
+				keyboard.update();
 				renderer.render( scene, camera );
 			}
 
@@ -89,7 +102,8 @@
 			{
 				initScene();
 				geometry();
-				light()
+				light()				
+				key();
 				animate();
 			}
 
